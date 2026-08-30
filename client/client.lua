@@ -21,23 +21,13 @@ function GetNearbyLabels(maxDist)
 end
 
 -- Render loop function
-function DrawText3D(x, y, z, text, zOffset, scale, r, g, b, a, font, shadow, outline)
+function DrawText3D(x, y, z, text, zOffset, scale, r, g, b, a, font)
     local onScreen, _x, _y = GetScreenCoordFromWorldCoord(x, y, z + (zOffset or 0.0))
     if onScreen then
         SetTextScale(scale or Config.TextScale, scale or Config.TextScale)
         SetTextFontForCurrentCommand(font or Config.TextFont)
         SetTextColor(r or Config.TextColor.r, g or Config.TextColor.g, b or Config.TextColor.b, a or Config.TextColor.a)
         SetTextCentre(true)
-        
-        -- Shadow rendering
-        if shadow == nil or shadow == 1 or shadow == true then
-            SetTextDropshadow(1, 0, 0, 0, 255)
-        end
-        
-        -- Outline rendering
-        if outline == 1 or outline == true then
-            SetTextOutline()
-        end
         
         local str = CreateVarString(10, 'LITERAL_STRING', text)
         DisplayText(str, _x, _y)
@@ -65,7 +55,7 @@ CreateThread(function()
                         label.x, label.y, label.z,
                         label.text, label.z_offset, label.scale,
                         label.color_r, label.color_g, label.color_b, label.color_a,
-                        label.font, label.shadow, label.outline
+                        label.font
                     )
                 end
             end
@@ -82,7 +72,7 @@ CreateThread(function()
                 drawCoords.x, drawCoords.y, drawCoords.z,
                 previewData.text, previewData.z_offset, previewData.scale,
                 previewData.color.r, previewData.color.g, previewData.color.b, previewData.color.a,
-                previewData.font, previewData.shadow, previewData.outline
+                previewData.font
             )
         end
 
@@ -130,6 +120,9 @@ RegisterNUICallback('coi_label:closeUI', function(data, cb)
     isUIOpen = false
     previewData = nil
     SetNuiFocus(false, false)
+    SendNUIMessage({
+        action = "close"
+    })
     cb('ok')
 end)
 
@@ -142,6 +135,9 @@ RegisterNUICallback('coi_label:saveLabel', function(data, cb)
     isUIOpen = false
     previewData = nil
     SetNuiFocus(false, false)
+    SendNUIMessage({
+        action = "close"
+    })
     TriggerServerEvent('coi_label:createLabel', data)
     cb('ok')
 end)
@@ -150,6 +146,9 @@ RegisterNUICallback('coi_label:updateLabel', function(data, cb)
     isUIOpen = false
     previewData = nil
     SetNuiFocus(false, false)
+    SendNUIMessage({
+        action = "close"
+    })
     TriggerServerEvent('coi_label:updateLabel', data)
     cb('ok')
 end)
