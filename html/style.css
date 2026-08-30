@@ -521,14 +521,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     text-overflow: ellipsis;
 }
 
-/* Styled text shadows and borders based on checkboxes */
-.preview-shadow {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
-}
 
-.preview-outline {
-    -webkit-text-stroke: 1px #000000;
-}
 
 /* Actions */
 .actions-row {

@@ -11,8 +11,7 @@ const sliderScale = document.getElementById('slider-scale');
 const sliderDistance = document.getElementById('slider-distance');
 const colorPresets = document.querySelectorAll('.color-preset');
 const colorPicker = document.getElementById('color-picker');
-const toggleShadow = document.getElementById('toggle-shadow');
-const toggleOutline = document.getElementById('toggle-outline');
+
 
 // Value badges
 const valZOffset = document.getElementById('val-z-offset');
@@ -66,8 +65,7 @@ window.addEventListener('message', function(event) {
         sliderDistance.value = 15.0;
         selectedColor = '#ffffff';
         colorPicker.value = '#ffffff';
-        toggleShadow.checked = true;
-        toggleOutline.checked = false;
+
         
         // Reset color preset selection
         colorPresets.forEach(btn => btn.classList.remove('active'));
@@ -146,8 +144,7 @@ navButtons.forEach(btn => {
                 document.querySelector('input[name="font-type"][value="1"]').checked = true;
                 fontCards.forEach(c => c.classList.remove('active'));
                 document.querySelectorAll('.font-card')[0].classList.add('active');
-                toggleShadow.checked = true;
-                toggleOutline.checked = false;
+
                 updatePreview();
             }
         }
@@ -198,8 +195,7 @@ function startEditing(label) {
         }
     });
 
-    toggleShadow.checked = label.shadow === 1 || label.shadow === true;
-    toggleOutline.checked = label.outline === 1 || label.outline === true;
+
 
     // Change Header & Button texts
     document.querySelector('#tab-create .tab-title').textContent = `Edit Label #${label.id}`;
@@ -241,8 +237,6 @@ function updatePreview() {
     const scaleVal = parseFloat(sliderScale.value);
     const distanceVal = parseFloat(sliderDistance.value);
     const fontVal = parseInt(document.querySelector('input[name="font-type"]:checked').value);
-    const shadowVal = toggleShadow.checked;
-    const outlineVal = toggleOutline.checked;
     
     // Update Badge text
     valZOffset.textContent = (zOffsetVal >= 0 ? '+' : '') + zOffsetVal.toFixed(2) + 'm';
@@ -268,18 +262,7 @@ function updatePreview() {
         previewTextElement.style.fontStyle = "normal";
     }
     
-    // Shadows & outlines
-    if (shadowVal) {
-        previewTextElement.classList.add('preview-shadow');
-    } else {
-        previewTextElement.classList.remove('preview-shadow');
-    }
-    
-    if (outlineVal) {
-        previewTextElement.classList.add('preview-outline');
-    } else {
-        previewTextElement.classList.remove('preview-outline');
-    }
+    // Shadows & outlines removed
     
     // Convert hex color to RGB for RedM DrawText rendering
     const rgb = hexToRgb(selectedColor);
@@ -297,8 +280,8 @@ function updatePreview() {
             distance: distanceVal,
             color: { r: rgb.r, g: rgb.g, b: rgb.b, a: 220 },
             font: fontVal,
-            shadow: shadowVal,
-            outline: outlineVal,
+            shadow: 0,
+            outline: 0,
             editingId: editingLabelId,
             coords: editingCoords
         })
@@ -310,8 +293,6 @@ inputText.addEventListener('input', updatePreview);
 sliderZOffset.addEventListener('input', updatePreview);
 sliderScale.addEventListener('input', updatePreview);
 sliderDistance.addEventListener('input', updatePreview);
-toggleShadow.addEventListener('change', updatePreview);
-toggleOutline.addEventListener('change', updatePreview);
 
 // Preset Color Selector
 colorPresets.forEach(preset => {
@@ -340,8 +321,6 @@ createBtn.addEventListener('click', () => {
     const scaleVal = parseFloat(sliderScale.value);
     const distanceVal = parseFloat(sliderDistance.value);
     const fontVal = parseInt(document.querySelector('input[name="font-type"]:checked').value);
-    const shadowVal = toggleShadow.checked;
-    const outlineVal = toggleOutline.checked;
     const rgb = hexToRgb(selectedColor);
     
     if (editingLabelId !== null) {
@@ -362,8 +341,8 @@ createBtn.addEventListener('click', () => {
                 color_b: rgb.b,
                 color_a: 220,
                 font: fontVal,
-                shadow: shadowVal ? 1 : 0,
-                outline: outlineVal ? 1 : 0
+                shadow: 0,
+                outline: 0
             })
         });
         resetCreateMode();
@@ -384,8 +363,8 @@ createBtn.addEventListener('click', () => {
                 color_b: rgb.b,
                 color_a: 220,
                 font: fontVal,
-                shadow: shadowVal ? 1 : 0,
-                outline: outlineVal ? 1 : 0
+                shadow: 0,
+                outline: 0
             })
         });
     }
