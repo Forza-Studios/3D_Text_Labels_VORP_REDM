@@ -175,12 +175,15 @@ RegisterNUICallback('coi_label:deleteAll', function(data, cb)
 end)
 
 RegisterNUICallback('coi_label:teleportTo', function(data, cb)
-    for _, label in ipairs(labelsList) do
-        if label.id == data.id then
-            local ped = PlayerPedId()
-            SetEntityCoords(ped, label.x, label.y, label.z + 1.0, false, false, false, true)
-            TriggerEvent("vorp:TipRight", "Teleported to label location", 3000)
-            break
+    local targetId = tonumber(data.id)
+    if targetId then
+        for _, label in ipairs(labelsList) do
+            if label.id == targetId then
+                local ped = PlayerPedId()
+                SetEntityCoords(ped, label.x, label.y, label.z + 1.0, false, false, false, true)
+                TriggerEvent("vorp:TipRight", "Teleported to label location", 3000)
+                break
+            end
         end
     end
     cb('ok')

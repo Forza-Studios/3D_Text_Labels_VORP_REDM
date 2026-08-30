@@ -305,9 +305,12 @@ RegisterNetEvent('coi_label:deleteLabel', function(labelId)
         return
     end
 
-    MySQL.query('DELETE FROM coi_labels WHERE id = ?', { labelId }, function(result)
+    local idNum = tonumber(labelId)
+    if not idNum then return end
+
+    MySQL.query('DELETE FROM coi_labels WHERE id = ?', { idNum }, function(result)
         for i, label in ipairs(worldLabels) do
-            if label.id == labelId then
+            if label.id == idNum then
                 table.remove(worldLabels, i)
                 break
             end

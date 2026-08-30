@@ -107,9 +107,15 @@ function closePanel() {
 
 closeBtn.addEventListener('click', closePanel);
 
-// Escape key listener to close menu
+// Escape and Backspace key listener to close menu
 document.addEventListener('keydown', function(event) {
+    const isEditingInput = document.activeElement && 
+                           (document.activeElement.tagName === 'INPUT' || 
+                            document.activeElement.tagName === 'TEXTAREA');
+
     if (event.key === 'Escape' || event.key === 'Esc') {
+        closePanel();
+    } else if (event.key === 'Backspace' && !isEditingInput) {
         closePanel();
     }
 });
@@ -461,10 +467,12 @@ function renderLabelsList(labels) {
         tr.querySelector('.btn-edit').addEventListener('click', () => {
             startEditing(label);
         });
-        
+
         // Delete action listener
-        tr.querySelector('.btn-delete').addEventListener('click', () => {
-            if (confirm(`Are you sure you want to delete label [${label.id}]?`)) {
+        let deleteTimeout = null;
+        const deleteBtn = tr.querySelector('.btn-delete');
+        deleteBtn.addEventListener('click', () => {
+            if (deleteBtn.classList.contains('confirm-delete')) {
                 fetch(`https://${GetParentResourceName()}/coi_label:deleteLabel`, {
                     method: 'POST',
                     headers: {
@@ -472,6 +480,15 @@ function renderLabelsList(labels) {
                     },
                     body: JSON.stringify({ id: label.id })
                 });
+                deleteBtn.classList.remove('confirm-delete');
+                clearTimeout(deleteTimeout);
+            } else {
+                deleteBtn.classList.add('confirm-delete');
+                deleteBtn.title = "Click again to confirm delete";
+                deleteTimeout = setTimeout(() => {
+                    deleteBtn.classList.remove('confirm-delete');
+                    deleteBtn.title = "Delete Label";
+                }, 3000);
             }
         });
         
@@ -480,8 +497,9 @@ function renderLabelsList(labels) {
 }
 
 // Delete All click listener
+let deleteAllTimeout = null;
 deleteAllBtn.addEventListener('click', () => {
-    if (confirm("Are you sure you want to delete ALL active labels in the database? This action cannot be undone.")) {
+    if (deleteAllBtn.classList.contains('confirm-delete')) {
         fetch(`https://${GetParentResourceName()}/coi_label:deleteAll`, {
             method: 'POST',
             headers: {
@@ -489,6 +507,32 @@ deleteAllBtn.addEventListener('click', () => {
             },
             body: JSON.stringify({})
         });
+        deleteAllBtn.classList.remove('confirm-delete');
+        deleteAllBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="16" height="16" style="margin-right: 6px;">
+                <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+            </svg>
+            Delete All Labels
+        `;
+        clearTimeout(deleteAllTimeout);
+    } else {
+        deleteAllBtn.classList.add('confirm-delete');
+        deleteAllBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" width="16" height="16" style="margin-right: 6px;">
+                <path fill="currentColor" d="M12,2L1,21H23L12,2M12,6L19.53,19H4.47L12,6M11,10V14H13V10H11M11,16V18H13V16H11Z" />
+            </svg>
+            Confirm Delete ALL?
+        `;
+        
+        deleteAllTimeout = setTimeout(() => {
+            deleteAllBtn.classList.remove('confirm-delete');
+            deleteAllBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" width="16" height="16" style="margin-right: 6px;">
+                    <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                </svg>
+                Delete All Labels
+            `;
+        }, 4000);
     }
 });
 
