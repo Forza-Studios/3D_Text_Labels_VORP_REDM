@@ -3,7 +3,7 @@ rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aw
 game "rdr3"
 
 name "coi_label"
-author "Antigravity"
+author "_Forza"
 lua54 'yes'
 description "3D World Labels Creator and Renderer for VORP Core Admins"
 version "1.0.0"
