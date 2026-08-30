@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS `coi_labels` (
     `x` FLOAT NOT NULL,
     `y` FLOAT NOT NULL,
     `z` FLOAT NOT NULL,
+    `x_offset` FLOAT NOT NULL DEFAULT 0.0,
+    `y_offset` FLOAT NOT NULL DEFAULT 0.0,
     `z_offset` FLOAT NOT NULL DEFAULT 0.0,
     `color_r` INT NOT NULL DEFAULT 255,
     `color_g` INT NOT NULL DEFAULT 255,

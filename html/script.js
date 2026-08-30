@@ -6,6 +6,8 @@ const closeBtn = document.getElementById('close-btn');
 
 // Input Controls
 const inputText = document.getElementById('label-text');
+const sliderXOffset = document.getElementById('slider-x-offset');
+const sliderYOffset = document.getElementById('slider-y-offset');
 const sliderZOffset = document.getElementById('slider-z-offset');
 const sliderScale = document.getElementById('slider-scale');
 const sliderDistance = document.getElementById('slider-distance');
@@ -14,6 +16,8 @@ const colorPicker = document.getElementById('color-picker');
 
 
 // Value badges
+const valXOffset = document.getElementById('val-x-offset');
+const valYOffset = document.getElementById('val-y-offset');
 const valZOffset = document.getElementById('val-z-offset');
 const valScale = document.getElementById('val-scale');
 const valDistance = document.getElementById('val-distance');
@@ -60,6 +64,8 @@ window.addEventListener('message', function(event) {
         // Reset Inputs & Edit state
         resetCreateMode();
         inputText.value = "Admin Announcement";
+        sliderXOffset.value = 0.0;
+        sliderYOffset.value = 0.0;
         sliderZOffset.value = 0.0;
         sliderScale.value = 0.35;
         sliderDistance.value = 15.0;
@@ -134,6 +140,8 @@ navButtons.forEach(btn => {
             if (editingLabelId !== null) {
                 resetCreateMode();
                 inputText.value = "Admin Announcement";
+                sliderXOffset.value = 0.0;
+                sliderYOffset.value = 0.0;
                 sliderZOffset.value = 0.0;
                 sliderScale.value = 0.35;
                 sliderDistance.value = 15.0;
@@ -169,6 +177,8 @@ function startEditing(label) {
     editingCoords = { x: label.x, y: label.y, z: label.z };
 
     inputText.value = label.text;
+    sliderXOffset.value = label.x_offset;
+    sliderYOffset.value = label.y_offset;
     sliderZOffset.value = label.z_offset;
     sliderScale.value = label.scale;
     sliderDistance.value = label.distance;
@@ -233,12 +243,16 @@ function resetCreateMode() {
 // Live Preview Update Logic
 function updatePreview() {
     const textVal = inputText.value || " ";
+    const xOffsetVal = parseFloat(sliderXOffset.value);
+    const yOffsetVal = parseFloat(sliderYOffset.value);
     const zOffsetVal = parseFloat(sliderZOffset.value);
     const scaleVal = parseFloat(sliderScale.value);
     const distanceVal = parseFloat(sliderDistance.value);
     const fontVal = parseInt(document.querySelector('input[name="font-type"]:checked').value);
     
     // Update Badge text
+    valXOffset.textContent = (xOffsetVal >= 0 ? '+' : '') + xOffsetVal.toFixed(2) + 'm';
+    valYOffset.textContent = (yOffsetVal >= 0 ? '+' : '') + yOffsetVal.toFixed(2) + 'm';
     valZOffset.textContent = (zOffsetVal >= 0 ? '+' : '') + zOffsetVal.toFixed(2) + 'm';
     valScale.textContent = scaleVal.toFixed(2) + 'x';
     valDistance.textContent = distanceVal.toFixed(0) + '.0m';
@@ -275,6 +289,8 @@ function updatePreview() {
         },
         body: JSON.stringify({
             text: textVal,
+            x_offset: xOffsetVal,
+            y_offset: yOffsetVal,
             z_offset: zOffsetVal,
             scale: scaleVal,
             distance: distanceVal,
@@ -290,6 +306,8 @@ function updatePreview() {
 
 // Add input listeners
 inputText.addEventListener('input', updatePreview);
+sliderXOffset.addEventListener('input', updatePreview);
+sliderYOffset.addEventListener('input', updatePreview);
 sliderZOffset.addEventListener('input', updatePreview);
 sliderScale.addEventListener('input', updatePreview);
 sliderDistance.addEventListener('input', updatePreview);
@@ -317,6 +335,8 @@ createBtn.addEventListener('click', () => {
     const textVal = inputText.value;
     if (!textVal || textVal.trim() === "") return;
     
+    const xOffsetVal = parseFloat(sliderXOffset.value);
+    const yOffsetVal = parseFloat(sliderYOffset.value);
     const zOffsetVal = parseFloat(sliderZOffset.value);
     const scaleVal = parseFloat(sliderScale.value);
     const distanceVal = parseFloat(sliderDistance.value);
@@ -333,6 +353,8 @@ createBtn.addEventListener('click', () => {
             body: JSON.stringify({
                 id: editingLabelId,
                 text: textVal,
+                x_offset: xOffsetVal,
+                y_offset: yOffsetVal,
                 z_offset: zOffsetVal,
                 scale: scaleVal,
                 distance: distanceVal,
@@ -355,6 +377,8 @@ createBtn.addEventListener('click', () => {
             },
             body: JSON.stringify({
                 text: textVal,
+                x_offset: xOffsetVal,
+                y_offset: yOffsetVal,
                 z_offset: zOffsetVal,
                 scale: scaleVal,
                 distance: distanceVal,
@@ -405,6 +429,8 @@ function renderLabelsList(labels) {
             </td>
             <td>
                 <div style="display:flex; flex-direction:column; gap:4px;">
+                    <span class="label-detail-badge">X: ${label.x_offset >= 0 ? '+' : ''}${label.x_offset.toFixed(2)}m</span>
+                    <span class="label-detail-badge">Y: ${label.y_offset >= 0 ? '+' : ''}${label.y_offset.toFixed(2)}m</span>
                     <span class="label-detail-badge">Z: ${label.z_offset >= 0 ? '+' : ''}${label.z_offset.toFixed(2)}m</span>
                     <span class="label-detail-badge">Size: ${label.scale.toFixed(2)}x</span>
                 </div>

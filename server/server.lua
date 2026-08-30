@@ -10,6 +10,8 @@ CreateThread(function()
             `x` FLOAT NOT NULL,
             `y` FLOAT NOT NULL,
             `z` FLOAT NOT NULL,
+            `x_offset` FLOAT NOT NULL DEFAULT 0.0,
+            `y_offset` FLOAT NOT NULL DEFAULT 0.0,
             `z_offset` FLOAT NOT NULL DEFAULT 0.0,
             `color_r` INT NOT NULL DEFAULT 255,
             `color_g` INT NOT NULL DEFAULT 255,
@@ -26,6 +28,8 @@ CreateThread(function()
     ]], {}, function()
         -- Auto migration check for columns in existing table installations
         local columns = {
+            { name = "x_offset", type = "FLOAT NOT NULL DEFAULT 0.0" },
+            { name = "y_offset", type = "FLOAT NOT NULL DEFAULT 0.0" },
             { name = "z_offset", type = "FLOAT NOT NULL DEFAULT 0.0" },
             { name = "color_r", type = "INT NOT NULL DEFAULT 255" },
             { name = "color_g", type = "INT NOT NULL DEFAULT 255" },
@@ -71,6 +75,8 @@ function LoadLabelsFromDatabase()
                     x = row.x,
                     y = row.y,
                     z = row.z,
+                    x_offset = tonumber(row.x_offset) or 0.0,
+                    y_offset = tonumber(row.y_offset) or 0.0,
                     z_offset = tonumber(row.z_offset) or 0.0,
                     color_r = tonumber(row.color_r) or 255,
                     color_g = tonumber(row.color_g) or 255,
@@ -158,6 +164,8 @@ RegisterNetEvent('coi_label:createLabel', function(data)
 
     -- Ensure sanitization and defaults
     local labelText = data.text or "Admin Announcement"
+    local xOffset = tonumber(data.x_offset) or 0.0
+    local yOffset = tonumber(data.y_offset) or 0.0
     local zOffset = tonumber(data.z_offset) or 0.0
     local scale = tonumber(data.scale) or 0.35
     local distance = tonumber(data.distance) or Config.DefaultDistance
@@ -171,11 +179,11 @@ RegisterNetEvent('coi_label:createLabel', function(data)
 
     MySQL.query([[
         INSERT INTO coi_labels 
-        (text, x, y, z, z_offset, color_r, color_g, color_b, color_a, scale, font, shadow, outline, distance, created_by) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (text, x, y, z, x_offset, y_offset, z_offset, color_r, color_g, color_b, color_a, scale, font, shadow, outline, distance, created_by) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ]],
     { 
-        labelText, coords.x, coords.y, coords.z, zOffset, 
+        labelText, coords.x, coords.y, coords.z, xOffset, yOffset, zOffset, 
         colorR, colorG, colorB, colorA, scale, font, shadow, outline, 
         distance, adminName 
     }, function(result)
@@ -187,6 +195,8 @@ RegisterNetEvent('coi_label:createLabel', function(data)
                 x = coords.x,
                 y = coords.y,
                 z = coords.z,
+                x_offset = xOffset,
+                y_offset = yOffset,
                 z_offset = zOffset,
                 color_r = colorR,
                 color_g = colorG,
@@ -242,6 +252,8 @@ RegisterNetEvent('coi_label:updateLabel', function(data)
     if not labelId then return end
 
     local labelText = data.text or "Admin Announcement"
+    local xOffset = tonumber(data.x_offset) or 0.0
+    local yOffset = tonumber(data.y_offset) or 0.0
     local zOffset = tonumber(data.z_offset) or 0.0
     local scale = tonumber(data.scale) or 0.35
     local distance = tonumber(data.distance) or Config.DefaultDistance
@@ -255,16 +267,18 @@ RegisterNetEvent('coi_label:updateLabel', function(data)
 
     MySQL.query([[
         UPDATE coi_labels 
-        SET text = ?, z_offset = ?, color_r = ?, color_g = ?, color_b = ?, color_a = ?, scale = ?, font = ?, shadow = ?, outline = ?, distance = ?
+        SET text = ?, x_offset = ?, y_offset = ?, z_offset = ?, color_r = ?, color_g = ?, color_b = ?, color_a = ?, scale = ?, font = ?, shadow = ?, outline = ?, distance = ?
         WHERE id = ?
     ]], {
-        labelText, zOffset, colorR, colorG, colorB, colorA, scale, font, shadow, outline, distance, labelId
+        labelText, xOffset, yOffset, zOffset, colorR, colorG, colorB, colorA, scale, font, shadow, outline, distance, labelId
     }, function(result)
         if result then
             -- Update memory cache
             for _, label in ipairs(worldLabels) do
                 if label.id == labelId then
                     label.text = labelText
+                    label.x_offset = xOffset
+                    label.y_offset = yOffset
                     label.z_offset = zOffset
                     label.color_r = colorR
                     label.color_g = colorG

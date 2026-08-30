@@ -21,8 +21,8 @@ function GetNearbyLabels(maxDist)
 end
 
 -- Render loop function
-function DrawText3D(x, y, z, text, zOffset, scale, r, g, b, a, font)
-    local onScreen, _x, _y = GetScreenCoordFromWorldCoord(x, y, z + (zOffset or 0.0))
+function DrawText3D(x, y, z, text, xOffset, yOffset, zOffset, scale, r, g, b, a, font)
+    local onScreen, _x, _y = GetScreenCoordFromWorldCoord(x + (xOffset or 0.0), y + (yOffset or 0.0), z + (zOffset or 0.0))
     if onScreen then
         SetTextScale(scale or Config.TextScale, scale or Config.TextScale)
         SetTextFontForCurrentCommand(font or Config.TextFont)
@@ -53,7 +53,7 @@ CreateThread(function()
                     nearby = true
                     DrawText3D(
                         label.x, label.y, label.z,
-                        label.text, label.z_offset, label.scale,
+                        label.text, label.x_offset, label.y_offset, label.z_offset, label.scale,
                         label.color_r, label.color_g, label.color_b, label.color_a,
                         label.font
                     )
@@ -70,7 +70,7 @@ CreateThread(function()
             end
             DrawText3D(
                 drawCoords.x, drawCoords.y, drawCoords.z,
-                previewData.text, previewData.z_offset, previewData.scale,
+                previewData.text, previewData.x_offset, previewData.y_offset, previewData.z_offset, previewData.scale,
                 previewData.color.r, previewData.color.g, previewData.color.b, previewData.color.a,
                 previewData.font
             )
