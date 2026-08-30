@@ -217,6 +217,73 @@ RegisterNetEvent('coi_label:createLabel', function(data)
     end)
 end)
 
+-- Server Event: Update Label
+RegisterNetEvent('coi_label:updateLabel', function(data)
+    local _source = source
+    local User = VORPcore.getUser(_source)
+    if not User then return end
+
+    -- Server-side permission check
+    local group = User.getGroup
+    local isAllowed = false
+    for _, allowedGroup in ipairs(Config.AdminGroups) do
+        if group == allowedGroup then
+            isAllowed = true
+            break
+        end
+    end
+
+    if not isAllowed then
+        VORPcore.NotifyRightTip(_source, Config.Language.noPermission, 4000)
+        return
+    end
+
+    local labelId = tonumber(data.id)
+    if not labelId then return end
+
+    local labelText = data.text or "Admin Announcement"
+    local zOffset = tonumber(data.z_offset) or 0.0
+    local scale = tonumber(data.scale) or 0.35
+    local distance = tonumber(data.distance) or Config.DefaultDistance
+    local colorR = tonumber(data.color_r) or 255
+    local colorG = tonumber(data.color_g) or 255
+    local colorB = tonumber(data.color_b) or 255
+    local colorA = tonumber(data.color_a) or 220
+    local font = tonumber(data.font) or 1
+    local shadow = tonumber(data.shadow) or 1
+    local outline = tonumber(data.outline) or 0
+
+    MySQL.query([[
+        UPDATE coi_labels 
+        SET text = ?, z_offset = ?, color_r = ?, color_g = ?, color_b = ?, color_a = ?, scale = ?, font = ?, shadow = ?, outline = ?, distance = ?
+        WHERE id = ?
+    ]], {
+        labelText, zOffset, colorR, colorG, colorB, colorA, scale, font, shadow, outline, distance, labelId
+    }, function(result)
+        if result then
+            -- Update memory cache
+            for _, label in ipairs(worldLabels) do
+                if label.id == labelId then
+                    label.text = labelText
+                    label.z_offset = zOffset
+                    label.color_r = colorR
+                    label.color_g = colorG
+                    label.color_b = colorB
+                    label.color_a = colorA
+                    label.scale = scale
+                    label.font = font
+                    label.shadow = shadow
+                    label.outline = outline
+                    label.distance = distance
+                    break
+                end
+            end
+            TriggerClientEvent('coi_label:syncLabels', -1, worldLabels)
+            VORPcore.NotifyRightTip(_source, "Label updated successfully!", 4000)
+        end
+    end)
+end)
+
 -- Server Event: Delete Label
 RegisterNetEvent('coi_label:deleteLabel', function(labelId)
     local _source = source

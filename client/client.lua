@@ -57,7 +57,9 @@ CreateThread(function()
             for _, label in ipairs(labelsList) do
                 local dist = #(playerCoords - vector3(label.x, label.y, label.z))
                 -- Use the database-defined visibility distance parameter
-                if dist <= (label.distance or Config.DefaultDistance) then
+                -- Skip drawing the original label if it is currently being edited to prevent overlapping text
+                local isBeingEdited = isUIOpen and previewData and previewData.editingId == label.id
+                if not isBeingEdited and dist <= (label.distance or Config.DefaultDistance) then
                     nearby = true
                     DrawText3D(
                         label.x, label.y, label.z,
@@ -72,8 +74,12 @@ CreateThread(function()
         -- Render live 3D preview text for the label being designed
         if isUIOpen and previewData then
             nearby = true
+            local drawCoords = playerCoords
+            if previewData.editingId and previewData.coords then
+                drawCoords = vector3(previewData.coords.x, previewData.coords.y, previewData.coords.z)
+            end
             DrawText3D(
-                playerCoords.x, playerCoords.y, playerCoords.z,
+                drawCoords.x, drawCoords.y, drawCoords.z,
                 previewData.text, previewData.z_offset, previewData.scale,
                 previewData.color.r, previewData.color.g, previewData.color.b, previewData.color.a,
                 previewData.font, previewData.shadow, previewData.outline
@@ -137,6 +143,14 @@ RegisterNUICallback('coi_label:saveLabel', function(data, cb)
     previewData = nil
     SetNuiFocus(false, false)
     TriggerServerEvent('coi_label:createLabel', data)
+    cb('ok')
+end)
+
+RegisterNUICallback('coi_label:updateLabel', function(data, cb)
+    isUIOpen = false
+    previewData = nil
+    SetNuiFocus(false, false)
+    TriggerServerEvent('coi_label:updateLabel', data)
     cb('ok')
 end)
 
